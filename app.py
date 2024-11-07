@@ -1,16 +1,13 @@
-import streamlit as st
 import pdfplumber
 
-# File upload widget for PDF files in Streamlit
-uploaded_file = st.file_uploader("Choose a PDF file", type="pdf")
+# Path to your PDF file
+pdf_path = 'your_pdf_file.pdf'
 
-if uploaded_file is not None:
-    # Open the uploaded PDF file using pdfplumber
-    with pdfplumber.open(uploaded_file) as pdf:
-        # Extract text from the first page of the PDF
-        first_page = pdf.pages[0]
-        text = first_page.extract_text()
-        
-        # Display the extracted text in Streamlit
-        st.write("Extracted Text from PDF:")
-        st.text(text)
+# Open the PDF with pdfplumber
+with pdfplumber.open(pdf_path) as pdf:
+    # Extract text from the first page
+    first_page = pdf.pages[0]
+    text = first_page.extract_text()
+    
+    # Print the extracted text
+    print(text)
