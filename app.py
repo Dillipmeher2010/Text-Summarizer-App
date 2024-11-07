@@ -1,65 +1,23 @@
 import streamlit as st
 from transformers import pipeline
-import PyPDF2
-from docx import Document
-import io
 
-# Load summarizer pipeline (Specify your model here)
-summarizer = pipeline("summarization", model="google/gemini-xx-xxx")  # Replace with your Gemini model
+# Streamlit app title
+st.title("Text Summarization App")
 
-# Function to read PDF content
-def read_pdf(file):
-    try:
-        # Using PdfReader for new versions of PyPDF2
-        reader = PyPDF2.PdfReader(file)
-        text = ""
-        for page in reader.pages:
-            text += page.extract_text()
-        return text
-    except ImportError:
-        # Fallback for older versions
-        reader = PyPDF2.PdfFileReader(file)
-        text = ""
-        for page_num in range(reader.getNumPages()):
-            page = reader.getPage(page_num)
-            text += page.extract_text()
-        return text
+# Text input from the user
+st.write("Enter the text you want to summarize:")
 
-# Function to read Word file content
-def read_word(file):
-    doc = Document(file)
-    text = ""
-    for para in doc.paragraphs:
-        text += para.text
-    return text
+# Create a text area for the user to input text
+input_text = st.text_area("Text Input", height=300)
 
-# Sidebar options
-st.sidebar.title("Text Summarizer")
-input_option = st.sidebar.selectbox("Select input method", ["Paste Text", "Upload PDF", "Upload Word File"])
+# Initialize the Hugging Face summarization pipeline
+summarizer = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6")
 
-# Handling user input
-if input_option == "Paste Text":
-    text = st.text_area("Enter text to summarize", height=250)
-
-elif input_option == "Upload PDF":
-    uploaded_file = st.file_uploader("Choose a PDF file", type=["pdf"])
-    if uploaded_file is not None:
-        text = read_pdf(uploaded_file)
-
-elif input_option == "Upload Word File":
-    uploaded_file = st.file_uploader("Choose a Word file", type=["docx"])
-    if uploaded_file is not None:
-        text = read_word(uploaded_file)
-
-# Displaying summary
-if text:
-    st.subheader("Original Text")
-    st.write(text)
-    
-    # Summarize the text
-    try:
-        summary = summarizer(text, max_length=200, min_length=50, do_sample=False)
-        st.subheader("Summary")
+# Process the input text and generate the summary when the button is clicked
+if st.button("Summarize"):
+    if input_text.strip() != "":
+        summary = summarizer(input_text, max_length=150, min_length=50, do_sample=False)
+        st.subheader("Summary:")
         st.write(summary[0]['summary_text'])
-    except Exception as e:
-        st.error(f"Error summarizing text: {e}")
+    else:
+        st.warning("Please enter some text to summarize.")
