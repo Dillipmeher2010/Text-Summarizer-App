@@ -1,6 +1,4 @@
 streamlit==1.19.0
-torch==2.2.0  # Adjust the version as needed, depending on your Python version
-transformers==4.30.0  # Check for the version you want based on compatibility with the model
-PyPDF2==2.11.0  # Ensure compatibility with PdfReader and PdfFileReader
-python-docx==0.8.11  # For handling Word files
-huggingface_hub==0.15.1  # Ensure compatibility with Hugging Face model downloads
+torch==2.2.0
+transformers==4.30.0
+huggingface_hub==0.15.1
