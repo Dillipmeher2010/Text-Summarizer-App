@@ -1,58 +1,59 @@
 import streamlit as st
 from transformers import pipeline
-from PyPDF2 import PdfReader
+import PyPDF2
 import docx
 
-# Initialize Google Gemini (this requires an API call, replace with correct implementation if needed)
-summarizer = pipeline("summarization", model="google/gemini")  # Assuming Google Gemini is supported here.
+# Initialize text summarizer using HuggingFace's pipeline (or your Gemini model's API)
+summarizer = pipeline("summarization")
 
-# Function to extract text from a PDF
-def extract_text_from_pdf(file):
-    reader = PdfReader(file)
-    text = ""
-    for page in reader.pages:
-        text += page.extract_text()
-    return text
+# Title of the app
+st.title("Text Summarizer App")
 
-# Function to extract text from a Word document
-def extract_text_from_word(file):
-    doc = docx.Document(file)
-    text = ""
-    for para in doc.paragraphs:
-        text += para.text + "\n"
-    return text
+# Option to upload PDF or Word file or paste text
+option = st.selectbox("Choose how to input text", ["Upload PDF/Word File", "Paste Text"])
 
-# Streamlit app layout
-st.title("Text Summarization App")
-st.write("Upload a PDF or Word document, or paste your text below:")
-
-# Options for the user to provide input
-input_method = st.radio("Choose how to provide text", ("Upload File", "Paste Text"))
-
-if input_method == "Upload File":
-    uploaded_file = st.file_uploader("Upload a PDF or Word document", type=["pdf", "docx"])
+if option == "Upload PDF/Word File":
+    uploaded_file = st.file_uploader("Choose a file", type=["pdf", "docx"])
     
     if uploaded_file is not None:
-        # Extract text based on file type
+        # If PDF is uploaded
         if uploaded_file.type == "application/pdf":
-            text = extract_text_from_pdf(uploaded_file)
-            st.write("Extracted text from PDF:")
-        elif uploaded_file.type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
-            text = extract_text_from_word(uploaded_file)
-            st.write("Extracted text from Word document:")
+            reader = PyPDF2.PdfReader(uploaded_file)
+            text = ""
+            for page in reader.pages:
+                text += page.extract_text()
         
-        # Display the extracted text
-        st.text_area("Extracted Text", value=text, height=300)
+        # If Word file is uploaded
+        elif uploaded_file.type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+            doc = docx.Document(uploaded_file)
+            text = ""
+            for para in doc.paragraphs:
+                text += para.text
+        
+        # Show the extracted text (optional)
+        st.subheader("Extracted Text")
+        st.text_area("Extracted Text", text, height=200)
 
-elif input_method == "Paste Text":
-    text = st.text_area("Paste your text here:", height=300)
+elif option == "Paste Text":
+    text_input = st.text_area("Paste your text here", height=200)
 
-if text:
-    # Summarize the provided text
-    st.subheader("Summary:")
-    try:
-        summary = summarizer(text, max_length=150, min_length=50, do_sample=False)
+    # Summarization when text is pasted
+    if text_input:
+        summary = summarizer(text_input, max_length=200, min_length=50, do_sample=False)
+        st.subheader("Summary")
         st.write(summary[0]["summary_text"])
-    except Exception as e:
-        st.error(f"An error occurred: {e}")
 
+# Button to summarize the extracted text or pasted text
+if uploaded_file or text_input:
+    if option == "Upload PDF/Word File":
+        st.button("Summarize", on_click=lambda: summarize_text(text))
+    else:
+        st.button("Summarize", on_click=lambda: summarize_text(text_input))
+
+def summarize_text(input_text):
+    if input_text:
+        summary = summarizer(input_text, max_length=200, min_length=50, do_sample=False)
+        st.subheader("Summary")
+        st.write(summary[0]["summary_text"])
+    else:
+        st.error("Please provide some text to summarize.")
