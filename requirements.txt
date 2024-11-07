@@ -1,9 +1,4 @@
 streamlit==1.22.0
-pdfminer.six==20201018
-python-docx==0.8.11
 transformers==4.38.1
-torch==2.2.0
-google-cloud==0.34.0  # Older but compatible version
-google-auth==2.21.0
-google-auth-oauthlib==0.7.0
-google-api-python-client==2.94.0
+PyPDF2==1.26.0
+python-docx==0.8.11
