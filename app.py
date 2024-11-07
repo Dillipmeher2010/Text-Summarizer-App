@@ -9,11 +9,21 @@ summarizer = pipeline("summarization", model="google/gemini-xx-xxx")  # Replace 
 
 # Function to read PDF content
 def read_pdf(file):
-    reader = PyPDF2.PdfReader(file)
-    text = ""
-    for page in reader.pages:
-        text += page.extract_text()
-    return text
+    try:
+        # Using PdfReader for new versions of PyPDF2
+        reader = PyPDF2.PdfReader(file)
+        text = ""
+        for page in reader.pages:
+            text += page.extract_text()
+        return text
+    except ImportError:
+        # Fallback for older versions
+        reader = PyPDF2.PdfFileReader(file)
+        text = ""
+        for page_num in range(reader.getNumPages()):
+            page = reader.getPage(page_num)
+            text += page.extract_text()
+        return text
 
 # Function to read Word file content
 def read_word(file):
