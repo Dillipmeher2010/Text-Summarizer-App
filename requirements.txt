@@ -1,5 +1,4 @@
-streamlit
-huggingface_hub
-transformers
 pdfplumber
-PyPDF2
+transformers
+torch
+streamlit
