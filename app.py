@@ -1,18 +1,16 @@
 import streamlit as st
-from transformers import pipeline
+import pdfplumber
 
-# Load pre-trained model for summarization
-summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
+# File upload widget for PDF files in Streamlit
+uploaded_file = st.file_uploader("Choose a PDF file", type="pdf")
 
-# Streamlit app UI
-st.title("Text Summarization App")
-
-text_input = st.text_area("Enter Text to Summarize", "Paste your text here...")
-
-if st.button("Summarize"):
-    if text_input:
-        summary = summarizer(text_input, max_length=150, min_length=50, do_sample=False)
-        st.write("Summary: ")
-        st.write(summary[0]['summary_text'])
-    else:
-        st.write("Please enter text to summarize.")
+if uploaded_file is not None:
+    # Open the uploaded PDF file using pdfplumber
+    with pdfplumber.open(uploaded_file) as pdf:
+        # Extract text from the first page of the PDF
+        first_page = pdf.pages[0]
+        text = first_page.extract_text()
+        
+        # Display the extracted text in Streamlit
+        st.write("Extracted Text from PDF:")
+        st.text(text)
